@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f7f4ef" media="(prefers-color-scheme: light)" />
+  <title>PozApp</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css?v=5" />
+  <script>
+    // Aplica el tema antes de pintar para evitar parpadeo
+    (function() {
+      var t = localStorage.getItem('pozoapp_theme');
+      if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <img src="img/icon-192.png" class="splash-logo" alt="PozApp" onerror="this.style.display='none'" />
+  <span class="splash-title">PozApp</span>
+  <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
+  <div class="splash-dots">
+    <span class="splash-dot"></span>
+    <span class="splash-dot"></span>
+    <span class="splash-dot"></span>
+    <span class="splash-dot"></span>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="view active">
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Cambiar tema">
+    <svg id="themeIconSun" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg id="themeIconMoon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+  <div class="home-topbar">
+    <img src="img/icon-192.png" alt="PozApp" class="home-logo" onclick="pozoTap()" onerror="this.style.display='none'" />
+  </div>
+  <div class="home-buttons">
+    <button class="home-btn menu-btn" onclick="goTo('menu')">
+      <img src="img/icon-menu.png" class="feature-icon" alt="" onerror="this.style.display='none'" />
+      <span class="btn-text"><span class="btn-label">Menu semanal</span><span class="btn-badge" id="homeSemana"></span></span>
+    </button>
+    <button class="home-btn compra-btn" onclick="goTo('compra')">
+      <img src="img/icon-compra.png" class="feature-icon" alt="" onerror="this.style.display='none'" />
+      <span class="btn-text"><span class="btn-label">Lista de la compra</span><span class="btn-badge" id="homePendientes"></span></span>
+    </button>
+    <button class="home-btn pelis-btn" onclick="goTo('pelis')">
+      <img src="img/icon-pelis.png" class="feature-icon" alt="" onerror="this.style.display='none'" />
+      <span class="btn-text"><span class="btn-label">Pelis y series</span><span class="btn-badge" id="homePelis"></span></span>
+    </button>
+    <button class="home-btn tareas-btn" onclick="goTo('tareas')">
+      <img src="img/icon-tareas.png" class="feature-icon" alt="" onerror="this.style.display='none'" />
+      <span class="btn-text"><span class="btn-label">Tareas</span><span class="btn-badge" id="homeTareas"></span></span>
+    </button>
+    <button class="home-btn datos-btn" onclick="abrirDatos()">
+      <img src="img/icon-datos.png" class="feature-icon" alt="" onerror="this.style.display='none'" />
+      <span class="btn-text"><span class="btn-label">Datos</span><span class="btn-badge" id="homeDatos"></span></span>
+    </button>
+  </div>
+</div>
+
+<!-- MENÚ SEMANAL -->
+<div id="menu" class="view">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goTo('home')">←</button>
+    <img src="img/icon-menu.png" class="header-icon" alt="" onerror="this.style.display='none'" />
+    <span class="inner-title">Menú semanal</span>
+  </div>
+  <div class="scroll-content">
+    <div class="semana-header">
+      <span class="semana-label">Semana</span>
+      <span class="semana-display" id="semanaDisplay"></span>
+      <div class="semana-nav">
+        <button onclick="cambiarSemana(-1)">‹</button>
+        <button class="semana-hoy-btn" onclick="irSemanaActual()">Hoy</button>
+        <button onclick="cambiarSemana(1)">›</button>
+      </div>
+    </div>
+    <div class="dias-list" id="diasList"></div>
+    <div class="menu-actions">
+      <button class="save-btn" id="saveMenuBtn" onclick="guardarMenu()">Guardar<span class="save-tick">✓</span></button>
+      <button class="clear-btn" onclick="limpiarMenu()">Limpiar</button>
+    </div>
+    <div class="menu-bottom-spacer"></div>
+  </div>
+</div>
+
+<!-- LISTA DE LA COMPRA -->
+<div id="compra" class="view">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goTo('home')">←</button>
+    <img src="img/icon-compra.png" class="header-icon" alt="" onerror="this.style.display='none'" />
+    <span class="inner-title">Lista de la compra</span>
+    <span class="inner-badge" id="badgePendientes"></span>
+  </div>
+  <div class="scroll-content">
+    <div class="compra-add compra-add-wrap">
+      <input class="compra-field compra-field-main" id="nuevoItem" type="text" placeholder="Añadir producto..." />
+      <select class="compra-field compra-field-sm" id="superSelect">
+        <option value="general">General (todos)</option>
+        <option value="alimerka">Alimerka</option>
+        <option value="mercadona">Mercadona</option>
+        <option value="lidl">Lidl</option>
+      </select>
+      <button class="add-btn" onclick="anyadirItem()">Añadir</button>
+    </div>
+    <div class="super-buttons">
+      <button class="home-btn super-btn super-alimerka" onclick="goTo('superAlimerka')">
+        <img src="img/alimerka.png" class="feature-icon" alt="" onerror="this.style.display='none'" />
+        <span class="btn-text"><span class="btn-label">Alimerka</span><span class="btn-badge" id="badgeAlimerka"></span></span>
+      </button>
+      <button class="home-btn super-btn super-mercadona" onclick="goTo('superMercadona')">
+        <img src="img/mercadona.png" class="feature-icon" alt="" onerror="this.style.display='none'" />
+        <span class="btn-text"><span class="btn-label">Mercadona</span><span class="btn-badge" id="badgeMercadona"></span></span>
+      </button>
+      <button class="home-btn super-btn super-lidl" onclick="goTo('superLidl')">
+        <img src="img/lidl.png" class="feature-icon" alt="" onerror="this.style.display='none'" />
+        <span class="btn-text"><span class="btn-label">Lidl</span><span class="btn-badge" id="badgeLidl"></span></span>
+      </button>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Pendiente</div>
+      <div class="item-list" id="listaPendiente_global"><div class="empty-msg">La lista está vacía</div></div>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Comprado · mantén pulsado para borrar definitivamente</div>
+      <div class="item-list" id="listaEliminados_global"><div class="empty-msg">Nada comprado aún</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- VISTA SUPER: ALIMERKA -->
+<div id="superAlimerka" class="view">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goTo('compra')">←</button>
+    <img src="img/alimerka.png" class="header-icon" alt="" onerror="this.style.display='none'" />
+    <span class="inner-title">Alimerka</span>
+    <span class="inner-badge" id="badgePendientesAlimerka"></span>
+  </div>
+  <div class="scroll-content">
+    <div class="compra-section">
+      <div class="section-label">Pendiente</div>
+      <div class="item-list" id="listaPendiente_alimerka"><div class="empty-msg">La lista está vacía</div></div>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Comprado · mantén pulsado para borrar definitivamente</div>
+      <div class="item-list" id="listaEliminados_alimerka"><div class="empty-msg">Nada comprado aún</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- VISTA SUPER: MERCADONA -->
+<div id="superMercadona" class="view">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goTo('compra')">←</button>
+    <img src="img/mercadona.png" class="header-icon" alt="" onerror="this.style.display='none'" />
+    <span class="inner-title">Mercadona</span>
+    <span class="inner-badge" id="badgePendientesMercadona"></span>
+  </div>
+  <div class="scroll-content">
+    <div class="compra-section">
+      <div class="section-label">Pendiente</div>
+      <div class="item-list" id="listaPendiente_mercadona"><div class="empty-msg">La lista está vacía</div></div>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Comprado · mantén pulsado para borrar definitivamente</div>
+      <div class="item-list" id="listaEliminados_mercadona"><div class="empty-msg">Nada comprado aún</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- VISTA SUPER: LIDL -->
+<div id="superLidl" class="view">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goTo('compra')">←</button>
+    <img src="img/lidl.png" class="header-icon" alt="" onerror="this.style.display='none'" />
+    <span class="inner-title">Lidl</span>
+    <span class="inner-badge" id="badgePendientesLidl"></span>
+  </div>
+  <div class="scroll-content">
+    <div class="compra-section">
+      <div class="section-label">Pendiente</div>
+      <div class="item-list" id="listaPendiente_lidl"><div class="empty-msg">La lista está vacía</div></div>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Comprado · mantén pulsado para borrar definitivamente</div>
+      <div class="item-list" id="listaEliminados_lidl"><div class="empty-msg">Nada comprado aún</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PELICULAS Y SERIES -->
+<div id="pelis" class="view">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goTo('home')">←</button>
+    <img src="img/icon-pelis.png" class="header-icon" alt="" onerror="this.style.display='none'" />
+    <span class="inner-title">Pelis y series</span>
+    <span class="inner-badge" id="badgePelis" style="background:rgba(108,99,255,.12);color:#6c63ff"></span>
+  </div>
+  <div class="scroll-content">
+    <div class="compra-add compra-add-wrap">
+      <input class="compra-field compra-field-main" id="nuevaPeli" type="text" placeholder="Titulo..." />
+      <input class="compra-field compra-field-sm compra-field-nota" id="nuevaNota" type="text" placeholder="Nota" inputmode="decimal" />
+      <input class="compra-field compra-field-sm compra-field-plat" id="nuevaPlataforma" type="text" placeholder="Plataforma" />
+      <button class="add-btn" style="background:#6c63ff" onclick="anyadirPeli()">Añadir</button>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Lista</div>
+      <div class="item-list" id="listaPelis"><div class="empty-msg">Sin pelis todavia</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAREAS -->
+<div id="tareas" class="view">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goTo('home')">←</button>
+    <img src="img/icon-tareas.png" class="header-icon" alt="" onerror="this.style.display='none'" />
+    <span class="inner-title">Tareas</span>
+    <span class="inner-badge" id="badgeTareas" style="background:rgba(230,168,23,.12);color:#e6a817"></span>
+  </div>
+  <div class="scroll-content">
+    <div class="compra-add compra-add-wrap">
+      <input class="compra-field compra-field-main" id="nuevaTarea" type="text" placeholder="Nueva tarea..." />
+      <input class="compra-field compra-field-sm compra-field-fecha" id="nuevaFecha" type="date" />
+      <select class="urgencia-select" id="nuevaUrgencia">
+        <option value="ninguna">Sin urgencia</option>
+        <option value="baja">Baja</option>
+        <option value="media">Media</option>
+        <option value="alta">Alta</option>
+      </select>
+      <button class="add-btn add-btn-full" style="background:#e6a817" onclick="anyadirTarea()">Añadir</button>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Pendiente</div>
+      <div class="item-list" id="listaTareasPend"><div class="empty-msg">Sin tareas pendientes</div></div>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Hecho · manten pulsado para borrar</div>
+      <div class="item-list" id="listaTareasHechas"><div class="empty-msg">Nada hecho aun</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DATOS PERSONALES -->
+<div id="datos" class="view">
+  <div class="inner-header">
+    <button class="back-btn" onclick="cerrarDatos()">←</button>
+    <img src="img/icon-datos.png" class="header-icon" alt="" onerror="this.style.display='none'" />
+    <span class="inner-title">Datos</span>
+    <span class="inner-badge" id="badgeDatos" style="background:rgba(13,148,136,.12);color:#0d9488"></span>
+    <button class="datos-lock-btn" onclick="cerrarDatos()">Bloquear</button>
+  </div>
+  <div class="scroll-content">
+    <div class="compra-add">
+      <button class="add-btn add-btn-full" style="background:#0d9488" onclick="anyadirFicha()">Añadir ficha</button>
+    </div>
+    <div class="compra-section">
+      <div class="section-label">Fichas</div>
+      <div id="listaFichas"><div class="empty-msg">Sin fichas guardadas</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN OVERLAY -->
+<div class="pin-overlay" id="pinOverlay" style="display:none">
+  <div class="pin-card">
+    <div class="pin-title" id="pinTitle">Introduce tu PIN</div>
+    <div class="pin-subtitle" id="pinSubtitle"></div>
+    <div class="pin-dots" id="pinDots">
+      <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+      <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-grid">
+      <button class="pin-key" onclick="pinDigit('1')">1</button>
+      <button class="pin-key" onclick="pinDigit('2')">2</button>
+      <button class="pin-key" onclick="pinDigit('3')">3</button>
+      <button class="pin-key" onclick="pinDigit('4')">4</button>
+      <button class="pin-key" onclick="pinDigit('5')">5</button>
+      <button class="pin-key" onclick="pinDigit('6')">6</button>
+      <button class="pin-key" onclick="pinDigit('7')">7</button>
+      <button class="pin-key" onclick="pinDigit('8')">8</button>
+      <button class="pin-key" onclick="pinDigit('9')">9</button>
+      <button class="pin-key pin-key-cancel" onclick="pinCancelar()">Cancelar</button>
+      <button class="pin-key" onclick="pinDigit('0')">0</button>
+      <button class="pin-key pin-key-back" onclick="pinBorrar()">←</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fotoInput" accept="image/*" style="display:none" />
+
+<script src="js/app.js?v=4"></script>
+</body>
+</html>
