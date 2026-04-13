@@ -1,0 +1,14 @@
+# Datos personales (generados por la app en el servidor)
+data-*.json
+data.json
+semanas/
+
+# Configuración sensible
+config.php
+
+# Claude Code local
+.claude/settings.local.json
+
+# Sistema
+Thumbs.db
+.DS_Store

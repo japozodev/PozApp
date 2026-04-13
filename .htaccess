@@ -1,0 +1,20 @@
+# Permitir manifest.json para instalacion PWA
+<Files "manifest.json">
+    Require all granted
+</Files>
+
+# Bloquear ficheros de datos JSON (data-*.json)
+<FilesMatch "^data.*\.json$">
+    Require all denied
+</FilesMatch>
+
+# Bloquear acceso al directorio semanas
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^semanas/ - [F,L]
+</IfModule>
+
+# Bloquear acceso a .htaccess
+<Files .htaccess>
+    Require all denied
+</Files>
