@@ -566,8 +566,8 @@ function renderCompra() {
 
 function renderSuper(superId) {
   const all = itemsForSuper(superId);
-  const pendiente  = all.filter(it => !it.comprado).slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  const eliminados = all.filter(it =>  it.comprado);
+  const pendiente  = all.filter(it => !it.comprado).slice().sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+  const eliminados = all.filter(it =>  it.comprado).slice().sort((a, b) => (b.compradoAt || 0) - (a.compradoAt || 0));
 
   const cap = superId.charAt(0).toUpperCase() + superId.slice(1);
   const badgeHdr = document.getElementById('badgePendientes' + cap);
@@ -619,8 +619,8 @@ function renderSuper(superId) {
 
 function renderCompraGlobal() {
   const all = compra.items || [];
-  const pendiente  = all.filter(it => !it.comprado).slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  const eliminados = all.filter(it =>  it.comprado);
+  const pendiente  = all.filter(it => !it.comprado).slice().sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+  const eliminados = all.filter(it =>  it.comprado).slice().sort((a, b) => (b.compradoAt || 0) - (a.compradoAt || 0));
 
   const lp = document.getElementById('listaPendiente_global');
   const le = document.getElementById('listaEliminados_global');
@@ -708,6 +708,7 @@ async function eliminarItem(id, e) {
   SUPERS.forEach(s => { pendBefore[s] = itemsForSuper(s).filter(x => !x.comprado).length; });
 
   it.comprado = true;
+  it.compradoAt = Date.now();
 
   // Detectar transición >0 → 0 en cualquier super y disparar bigConfetti
   let algunoCompletado = false;
@@ -734,6 +735,7 @@ async function recuperarItem(id) {
   const it = (compra.items || []).find(x => x.id === id);
   if (!it) return;
   it.comprado = false;
+  delete it.compradoAt;
   renderCompra();
   actualizarHomeBadges();
   await guardarCompraApi();

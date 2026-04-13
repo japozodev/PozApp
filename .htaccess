@@ -3,6 +3,11 @@
     Require all granted
 </Files>
 
+# Bloquear config.php
+<Files "config.php">
+    Require all denied
+</Files>
+
 # Bloquear ficheros de datos JSON (data-*.json)
 <FilesMatch "^data.*\.json$">
     Require all denied
